@@ -231,9 +231,26 @@ bool ChatProcessor::handleCommand(ChatReceivedMessage& message) {
     auto newNick = renick(message.fromConnection, commandLine.trim());
     response = strf("Nick changed to {}", newNick);
   } else if (command == "w") {
-    String target = commandLine.extract();
+    // Extract the target name and remaining message properly, accounting for spaces
+    String target;
+    String messageContent;
+
+    // Split based on space, supporting quoted nicknames
+    if (commandLine.beginsWith("\"")) {
+      auto endQuoteIndex = commandLine.find("\"", 1);
+      if (endQuoteIndex != String::npos) {
+        target = commandLine.substr(1, endQuoteIndex - 1);
+        messageContent = commandLine.substr(endQuoteIndex + 1).trim();
+      }
+    } else {
+      // Standard extraction without quotes
+      target = commandLine.extract();
+      messageContent = commandLine.trim();
+    }
+
+    // Check if target exists in the nick list
     if (m_nicks.contains(target))
-      whisper(message.fromConnection, m_nicks.get(target), commandLine.trim());
+      whisper(message.fromConnection, m_nicks.get(target), messageContent);
     else
       response = strf("No such nick {}", target);
   } else if (m_commandHandler) {
@@ -254,4 +271,4 @@ bool ChatProcessor::handleCommand(ChatReceivedMessage& message) {
   return true;
 }
 
-}
+} // namespace Star
