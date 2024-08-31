@@ -238,7 +238,8 @@ bool ChatProcessor::handleCommand(ChatReceivedMessage& message) {
     // Split based on space, supporting quoted nicknames
     if (commandLine.beginsWith("\"")) {
       auto endQuoteIndex = commandLine.find("\"", 1);
-      if (endQuoteIndex != String::npos) {
+      // Check if the closing quote was found correctly
+      if (endQuoteIndex != -1) { // Assuming find returns -1 when not found
         target = commandLine.substr(1, endQuoteIndex - 1);
         messageContent = commandLine.substr(endQuoteIndex + 1).trim();
       }
